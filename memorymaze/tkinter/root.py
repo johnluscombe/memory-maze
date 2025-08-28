@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 
 from memorymaze import MemoryMaze
@@ -14,9 +16,14 @@ TITLE = "Memory Maze"
 
 PLAY = "PLAY"
 
-MEMORY_MAZE_ICON = "assets/memory-maze.ico"
-MEMORY_MAZE_LOGO = "assets/memory-maze-logo.png"
-LIVES_IMAGE = "assets/lives.png"
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
+
+MEMORY_MAZE_ICON = resource_path("assets/memory-maze.ico")
+MEMORY_MAZE_LOGO = resource_path("assets/memory-maze-logo.png")
+LIVES_IMAGE = resource_path("assets/lives.png")
 
 
 class MemoryMazeRoot(tk.Tk):
@@ -58,7 +65,7 @@ class MemoryMazeRoot(tk.Tk):
 
         self._show_start_frame(grid_canvas)
 
-        grid_canvas.bind(BUTTON_1, lambda event: self.grid_(event, grid_canvas))
+        grid_canvas.bind(BUTTON_1, lambda event: self._on_grid_canvas_click(event, grid_canvas))
         grid_canvas.bind(CONFIGURE, lambda *args: grid_canvas.redraw())
     
     def _show_start_frame(self, grid_canvas):

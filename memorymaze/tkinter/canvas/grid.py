@@ -114,7 +114,8 @@ class GridCanvas(tk.Canvas):
 
             if result == SelectResult.INCORRECT:
                 # Show path again after incorrect guess
-                self._redraw_and_show_path()
+                # Show guess was wrong for a beat before redrawing path
+                self.after(ANIMATION_DELAY, lambda: self._redraw_and_show_path())
         
         return result
 
