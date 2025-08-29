@@ -2,6 +2,10 @@ import tkinter as tk
 
 from memorymaze.animation import ANIMATION_CLEAR_DELAY
 from memorymaze.animation import ANIMATION_DELAY
+from memorymaze.keyutil import is_down
+from memorymaze.keyutil import is_left
+from memorymaze.keyutil import is_right
+from memorymaze.keyutil import is_up
 from memorymaze.result import SelectResult
 from memorymaze.style import CORRECT_COLOR
 from memorymaze.style import EMPTY_COLOR
@@ -9,6 +13,7 @@ from memorymaze.style import PATH_COLOR
 from memorymaze.style import INCORRECT_COLOR
 from memorymaze.style import OUTLINE_COLOR
 from memorymaze.style import OUTLINE_WIDTH
+
 
 class GridCanvas(tk.Canvas):
     """
@@ -75,6 +80,19 @@ class GridCanvas(tk.Canvas):
         # Don't allow input outside the grid
         if 0 <= x_grid < self._grid_size and 0 <= y_grid < self._grid_size:
             self.select(x_grid, y_grid)
+    
+    def on_key(self, key):
+        result = self._memory_maze.grid.last_position
+        if result is not None:
+            px, py = result
+            if is_up(key):
+                self.select(px, py - 1)
+            elif is_down(key):
+                self.select(px, py + 1)
+            elif is_left(key):
+                self.select(px - 1, py)
+            elif is_right(key):
+                self.select(px + 1, py)
 
     def select(self, x, y):
         """

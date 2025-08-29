@@ -7,6 +7,7 @@ from memorymaze.animation import ANIMATION_DELAY
 from memorymaze.tkinter.canvas.grid import GridCanvas
 from memorymaze.tkinter.event import BUTTON_1
 from memorymaze.tkinter.event import CONFIGURE
+from memorymaze.tkinter.event import KEY
 from memorymaze.style import BOLD
 from memorymaze.style import PRIMARY_COLOR
 from memorymaze.style import SECONDARY_COLOR
@@ -67,6 +68,7 @@ class MemoryMazeRoot(tk.Tk):
 
         grid_canvas.bind(BUTTON_1, lambda event: self._on_grid_canvas_click(event, grid_canvas))
         grid_canvas.bind(CONFIGURE, lambda *args: grid_canvas.redraw())
+        self.bind(KEY, lambda event: self._on_key(event, grid_canvas))
     
     def _show_start_frame(self, grid_canvas):
         """
@@ -147,6 +149,17 @@ class MemoryMazeRoot(tk.Tk):
         """
 
         grid_canvas.on_click(event.x, event.y)
+        self._redraw_variables()
+    
+    def _on_key(self, event, grid_canvas):
+        """
+        Called when a key on the keyboard is pressed.
+
+        Arguments:
+            event: Tkinter key event.
+        """
+
+        grid_canvas.on_key(event.keysym)
         self._redraw_variables()
     
     def _redraw_variables(self):

@@ -24,6 +24,18 @@ class MemoryMazeGrid:
         
         return self._path
     
+    @property
+    def last_position(self):
+        """
+        Returns the previously selected square. Returns None if no square was
+        previously selected.
+        """
+
+        if self._current_index == 0:
+            return None
+        
+        return self._path[self._current_index - 1]
+    
     def generate_path(self, path_length, grid_size):
         """
         Generates a path on the grid of the given length and grid size.
@@ -85,13 +97,15 @@ class MemoryMazeGrid:
             bool
         """
 
-        if self._current_index == 0:
+        result = self.last_position
+
+        if result is None:
             # We are on the first square, count any click on the bottom row
             # We do not have access to grid size in this class, but the first
             # square is guaranteed to have a Y coordinate of the bottom row
             return y == self._path[0][1]
 
-        px, py = self._path[self._current_index - 1]
+        px, py = result
         return (x, y) in [(px-1, py), (px, py-1), (px+1, py)]
     
     def _generate_path(self, path_length, grid_size, current_path):
