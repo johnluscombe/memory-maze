@@ -136,6 +136,17 @@ class GridCanvas(tk.Canvas):
                 self.after(ANIMATION_DELAY, lambda: self._redraw_and_show_path())
         
         return result
+    
+    @property
+    def game_state(self):
+        """
+        Returns the game state.
+
+        Returns:
+            :class:`~GameState`
+        """
+
+        return self._memory_maze.game_state
 
     def _wait_and_draw_next_square(self, idx):
         """

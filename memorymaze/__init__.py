@@ -85,7 +85,7 @@ class MemoryMaze:
         Resets the game state and generates a new path.
         """
 
-        self._game_state = self._game_state.reset()
+        self._game_state.reset()
         self._generate_path()
     
     def lock(self):

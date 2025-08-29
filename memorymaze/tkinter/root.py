@@ -4,6 +4,7 @@ import tkinter as tk
 
 from memorymaze import MemoryMaze
 from memorymaze.animation import ANIMATION_DELAY
+from memorymaze.animation import ANIMATION_CLEAR_DELAY
 from memorymaze.tkinter.canvas.grid import GridCanvas
 from memorymaze.tkinter.event import BUTTON_1
 from memorymaze.tkinter.event import CONFIGURE
@@ -16,6 +17,7 @@ from memorymaze.style import WHITE
 TITLE = "Memory Maze"
 
 PLAY = "PLAY"
+PLAY_AGAIN = "PLAY AGAIN"
 
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -97,7 +99,7 @@ class MemoryMazeRoot(tk.Tk):
         play_button_padding.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
         play_button_label.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
     
-    def _show_game_over(self):
+    def _show_game_over(self, grid_canvas):
         """
         Shows the "game over" frame.
 
@@ -107,13 +109,13 @@ class MemoryMazeRoot(tk.Tk):
 
         frame = tk.Frame(self, bg=PRIMARY_COLOR)
         label_container = tk.Frame(frame, bg=PRIMARY_COLOR)
-        logo = tk.PhotoImage(file=MEMORY_MAZE_LOGO)
-        logo_label = tk.Label(label_container, image=logo, borderwidth=0)
-        logo_label.image = logo
-        logo_label.pack(side=tk.TOP, pady=(0, 10))
+        you_got_to_level = tk.Label(label_container, text="You got to level:", font=(None, 16), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
+        you_got_to_level.pack()
+        level_label = tk.Label(label_container, text=grid_canvas.game_state.level, font=(None, 48, BOLD), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
+        level_label.pack()
         play_button_border = tk.Frame(label_container, borderwidth=2, bg=SECONDARY_COLOR, relief=tk.FLAT)
         play_button_padding = tk.Frame(play_button_border, bg=PRIMARY_COLOR)
-        play_button_label = tk.Label(play_button_padding, text=PLAY, width=10, bg=PRIMARY_COLOR, fg=SECONDARY_COLOR, font=(None, 16, BOLD), relief=tk.FLAT)
+        play_button_label = tk.Label(play_button_padding, text=PLAY_AGAIN, width=10, bg=PRIMARY_COLOR, fg=SECONDARY_COLOR, font=(None, 16, BOLD), relief=tk.FLAT)
         play_button_label.pack(padx=10, pady=10)
         play_button_padding.pack()
         play_button_border.pack(side=tk.TOP, pady=(20, 0))
@@ -134,6 +136,7 @@ class MemoryMazeRoot(tk.Tk):
             grid_canvas (:class:`~GridCanvas`): Grid canvas object.
         """
 
+        self._memory_maze.reset()
         start_frame.place_forget()
         grid_canvas.redraw()
         grid_canvas.after(ANIMATION_DELAY, lambda: grid_canvas.show_path())
@@ -150,6 +153,9 @@ class MemoryMazeRoot(tk.Tk):
 
         grid_canvas.on_click(event.x, event.y)
         self._redraw_variables()
+
+        if grid_canvas.game_state.is_game_over:
+            self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
     
     def _on_key(self, event, grid_canvas):
         """
@@ -161,6 +167,9 @@ class MemoryMazeRoot(tk.Tk):
 
         grid_canvas.on_key(event.keysym)
         self._redraw_variables()
+
+        if grid_canvas.game_state.is_game_over:
+            self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
     
     def _redraw_variables(self):
         """

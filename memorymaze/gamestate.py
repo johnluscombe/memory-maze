@@ -64,7 +64,7 @@ class GameState:
         return self._lives > 0
 
     @property
-    def game_over(self):
+    def is_game_over(self):
         """
         Returns whether the game is over.
 
