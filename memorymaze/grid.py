@@ -40,6 +40,8 @@ class MemoryMazeGrid:
     def select(self, x, y):
         """
         Selects a grid coordinate and returns the result of that action.
+        If the user selects a square that is *not* adjacent to the previously
+        selected square, None is returned.
         If the user selects an incorrect square, an INCORRECT result is
         returned.
         If the user selects a correct square, a CORRECT result is returned.
@@ -60,8 +62,37 @@ class MemoryMazeGrid:
             if self._current_index >= len(self._path):
                 return SelectResult.COMPLETE
             return SelectResult.CORRECT
-        self._current_index = 0
-        return SelectResult.INCORRECT
+        
+        if self._is_adjacent(x, y):
+            self._current_index = 0
+            return SelectResult.INCORRECT
+        
+        # Do not register clicks on squares that are not adjacent to the
+        # previously selected square.
+        return None
+    
+    def _is_adjacent(self, x, y):
+        """
+        Returns whether the given grid coordinates are adjacent to the
+        previously selected square. Clicks on squares *not* adjacent to the
+        previously selected square are ignored.
+
+        Arguments:
+            x (int): X grid coordinate.
+            y (int): Y grid coordinate.
+
+        Returns:
+            bool
+        """
+
+        if self._current_index == 0:
+            # We are on the first square, count any click on the bottom row
+            # We do not have access to grid size in this class, but the first
+            # square is guaranteed to have a Y coordinate of the bottom row
+            return y == self._path[0][1]
+
+        px, py = self._path[self._current_index - 1]
+        return (x, y) in [(px-1, py), (px, py-1), (px+1, py)]
     
     def _generate_path(self, path_length, grid_size, current_path):
         """
