@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['__main__.py'],
+    ['memorymaze/__main__.py'],
     pathex=[],
     binaries=[],
     datas=[('assets', 'assets')],
