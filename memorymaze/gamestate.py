@@ -1,3 +1,5 @@
+import uuid
+
 # Grid size on Level 1.
 START_GRID_SIZE = 5
 
@@ -17,8 +19,21 @@ class GameState:
     """
     
     def __init__(self):
+        self._session = uuid.uuid4()
         self._level = 1
         self._lives = STARTING_LIVES
+    
+    @property
+    def session(self):
+        """
+        Returns the session ID. Used to associate individual game plays and
+        persist data.
+
+        Returns:
+            str
+        """
+
+        return self._session
     
     @property
     def level(self):
@@ -101,5 +116,6 @@ class GameState:
         Resets the game to its initial state.
         """
 
+        self._session = uuid.uuid4()
         self._level = 1
         self._lives = STARTING_LIVES

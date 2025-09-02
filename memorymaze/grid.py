@@ -75,7 +75,7 @@ class MemoryMazeGrid:
                 return SelectResult.COMPLETE
             return SelectResult.CORRECT
         
-        if self._is_adjacent(x, y):
+        if self._is_valid_move(x, y):
             self._current_index = 0
             return SelectResult.INCORRECT
         
@@ -83,11 +83,12 @@ class MemoryMazeGrid:
         # previously selected square.
         return None
     
-    def _is_adjacent(self, x, y):
+    def _is_valid_move(self, x, y):
         """
-        Returns whether the given grid coordinates are adjacent to the
-        previously selected square. Clicks on squares *not* adjacent to the
-        previously selected square are ignored.
+        Returns whether the given grid coordinates represent a valid move.
+        In order to be valid, the grid coordinates *must* be adjacent to the
+        previously selected square, and *not* a previously selected square.
+        Invalid moves are ignored.
 
         Arguments:
             x (int): X grid coordinate.
@@ -104,9 +105,14 @@ class MemoryMazeGrid:
             # We do not have access to grid size in this class, but the first
             # square is guaranteed to have a Y coordinate of the bottom row
             return y == self._path[0][1]
+        
+        # Do not count previously selected squares
+        if (x, y) in self._path[:self._current_index]:
+            return False
 
+        # Check if square is adjacent
         px, py = result
-        return (x, y) in [(px-1, py), (px, py-1), (px+1, py)]
+        return (x, y) in [(px-1, py), (px, py-1), (px+1, py), (px, py+1)]
     
     def _generate_path(self, path_length, grid_size, current_path):
         """

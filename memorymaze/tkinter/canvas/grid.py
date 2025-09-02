@@ -72,7 +72,7 @@ class GridCanvas(tk.Canvas):
 
         Arguments:
             canvas_x (int): Canvas X coordinate.
-            canvas_y (int): Canvas Y coordinate
+            canvas_y (int): Canvas Y coordinate.
         """
 
         x_grid, y_grid = self._to_grid_coords(canvas_x, canvas_y)
@@ -82,6 +82,13 @@ class GridCanvas(tk.Canvas):
             self.select(x_grid, y_grid)
     
     def on_key(self, key):
+        """
+        Handles keyboard events.
+
+        Arguments:
+            key (str): The key that was pressed.
+        """
+
         result = self._memory_maze.grid.last_position
         if result is not None:
             px, py = result
@@ -136,17 +143,6 @@ class GridCanvas(tk.Canvas):
                 self.after(ANIMATION_DELAY, lambda: self._redraw_and_show_path())
         
         return result
-    
-    @property
-    def game_state(self):
-        """
-        Returns the game state.
-
-        Returns:
-            :class:`~GameState`
-        """
-
-        return self._memory_maze.game_state
 
     def _wait_and_draw_next_square(self, idx):
         """

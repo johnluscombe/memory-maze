@@ -1,6 +1,9 @@
+from datetime import date
 import os
 import sys
 import tkinter as tk
+
+import xml.etree.cElementTree as ET
 
 from memorymaze import MemoryMaze
 from memorymaze.animation import ANIMATION_DELAY
@@ -27,6 +30,8 @@ def resource_path(relative_path):
 MEMORY_MAZE_ICON = resource_path("assets/memory-maze.ico")
 MEMORY_MAZE_LOGO = resource_path("assets/memory-maze-logo.png")
 LIVES_IMAGE = resource_path("assets/lives.png")
+
+DATA_FILE = resource_path("data.dat")
 
 
 class MemoryMazeRoot(tk.Tk):
@@ -72,6 +77,18 @@ class MemoryMazeRoot(tk.Tk):
         grid_canvas.bind(CONFIGURE, lambda *args: grid_canvas.redraw())
         self.bind(KEY, lambda event: self._on_key(event, grid_canvas))
     
+    @property
+    def _game_state(self):
+        """
+        Convenience method for getting the game state from the
+        :class:`~MemoryMaze` object.
+
+        Returns:
+            :class:`~GameState`
+        """
+
+        return self._memory_maze.game_state
+    
     def _show_start_frame(self, grid_canvas):
         """
         Shows the starting screen with the "play" button.
@@ -111,7 +128,7 @@ class MemoryMazeRoot(tk.Tk):
         label_container = tk.Frame(frame, bg=PRIMARY_COLOR)
         you_got_to_level = tk.Label(label_container, text="You got to level:", font=(None, 16), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
         you_got_to_level.pack()
-        level_label = tk.Label(label_container, text=grid_canvas.game_state.level, font=(None, 48, BOLD), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
+        level_label = tk.Label(label_container, text=self._game_state.level, font=(None, 48, BOLD), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
         level_label.pack()
         play_button_border = tk.Frame(label_container, borderwidth=2, bg=SECONDARY_COLOR, relief=tk.FLAT)
         play_button_padding = tk.Frame(play_button_border, bg=PRIMARY_COLOR)
@@ -151,11 +168,11 @@ class MemoryMazeRoot(tk.Tk):
             grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
-        grid_canvas.on_click(event.x, event.y)
-        self._redraw_variables()
+        previous_level = self._game_state.level
 
-        if grid_canvas.game_state.is_game_over:
-            self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
+        grid_canvas.on_click(event.x, event.y)
+
+        self._redraw_and_fire_events(previous_level, grid_canvas)
     
     def _on_key(self, event, grid_canvas):
         """
@@ -163,18 +180,80 @@ class MemoryMazeRoot(tk.Tk):
 
         Arguments:
             event: Tkinter key event.
+            grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
+        previous_level = self._game_state.level
+
         grid_canvas.on_key(event.keysym)
+
+        self._redraw_and_fire_events(previous_level, grid_canvas)
+    
+    def _redraw_and_fire_events(self, previous_level, grid_canvas):
+        """
+        Updates the level and number of lives, and fires any applicable
+        event-driven methods.
+
+        Arguments:
+            previous_level (int): Level the user was on prior to the event,
+                used to detect "next level" event.
+            grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
+        """
+
         self._redraw_variables()
 
-        if grid_canvas.game_state.is_game_over:
-            self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
+        if self._game_state.level > previous_level:
+            # self._write_data()
+            pass
+
+        if self._game_state.is_game_over:
+            self._on_game_over(grid_canvas)
+    
+    def _on_game_over(self, grid_canvas):
+        """
+        Called when the game is over.
+
+        Arguments:
+            grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
+        """
+
+        self._write_data()
+        self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
+    
+    def _write_data(self):
+        """
+        Writes any appropriate data to the data file.
+        """
+
+        if os.path.exists(DATA_FILE):
+            tree = ET.parse(DATA_FILE)
+            data = tree.getroot()
+        else:
+            root = ET.Element("memoryMaze")
+            ET.SubElement(root, "highScore").text = "1"
+            ET.SubElement(root, "history")
+            tree = ET.ElementTree(root)
+            tree.write(DATA_FILE)
+        
+        data = ET.parse(DATA_FILE).getroot()
+
+        high_score_node = data.find("highScore")
+        if self._game_state.level > int(high_score_node.text):
+            high_score_node.text = self._game_state.level
+
+        # history_node = data.find("history")
+        # entry_node = ET.SubElement(history_node, "entry")
+        # date_completed_node = ET.SubElement(entry_node, "dateCompleted")
+        # date_completed_node.text = date.today()
+        # score_node = ET.SubElement(entry_node, "score")
+        # score_node.text = self._game_state.level
+
+        # tree.write(DATA_FILE)
     
     def _redraw_variables(self):
         """
         Updates the game state variables, such as level and lives.
         """
 
-        self._level_text.set(str(self._memory_maze.game_state.level))
-        self._lives_text.set(str(self._memory_maze.game_state.lives))
+        self._level_text.set(str(self._game_state.level))
+        self._lives_text.set(str(self._game_state.lives))
