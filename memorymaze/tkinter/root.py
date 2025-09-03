@@ -1,31 +1,23 @@
-from datetime import date
-import os
-import sys
 import tkinter as tk
-
-import xml.etree.cElementTree as ET
 
 from memorymaze import MemoryMaze
 from memorymaze.animation import ANIMATION_DELAY
 from memorymaze.animation import ANIMATION_CLEAR_DELAY
-from memorymaze.tkinter.canvas.grid import GridCanvas
-from memorymaze.tkinter.event import BUTTON_1
-from memorymaze.tkinter.event import CONFIGURE
-from memorymaze.tkinter.event import KEY
+from memorymaze.data import MemoryMazeData
 from memorymaze.style import BOLD
 from memorymaze.style import PRIMARY_COLOR
 from memorymaze.style import SECONDARY_COLOR
 from memorymaze.style import WHITE
+from memorymaze.tkinter.canvas.grid import GridCanvas
+from memorymaze.tkinter.event import BUTTON_1
+from memorymaze.tkinter.event import CONFIGURE
+from memorymaze.tkinter.event import KEY
+from memorymaze.util import resource_path
 
 TITLE = "Memory Maze"
 
 PLAY = "PLAY"
 PLAY_AGAIN = "PLAY AGAIN"
-
-def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.abspath("."), relative_path)
 
 MEMORY_MAZE_ICON = resource_path("assets/memory-maze.ico")
 MEMORY_MAZE_LOGO = resource_path("assets/memory-maze-logo.png")
@@ -48,6 +40,8 @@ class MemoryMazeRoot(tk.Tk):
         self.configure(bg=PRIMARY_COLOR, padx=50, pady=25)
 
         self._memory_maze = MemoryMaze()
+        self._data = MemoryMazeData()
+        self._data.read_default()
 
         self._level_text = tk.StringVar()
         self._lives_text = tk.StringVar()
@@ -130,6 +124,10 @@ class MemoryMazeRoot(tk.Tk):
         you_got_to_level.pack()
         level_label = tk.Label(label_container, text=self._game_state.level, font=(None, 48, BOLD), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
         level_label.pack()
+        high_score_label = tk.Label(label_container, text="High Score:", font=(None, 16), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
+        high_score_label.pack()
+        high_score = tk.Label(label_container, text=self._data.high_score, font=(None, 24), bg=PRIMARY_COLOR, fg=SECONDARY_COLOR)
+        high_score.pack()
         play_button_border = tk.Frame(label_container, borderwidth=2, bg=SECONDARY_COLOR, relief=tk.FLAT)
         play_button_padding = tk.Frame(play_button_border, bg=PRIMARY_COLOR)
         play_button_label = tk.Label(play_button_padding, text=PLAY_AGAIN, width=10, bg=PRIMARY_COLOR, fg=SECONDARY_COLOR, font=(None, 16, BOLD), relief=tk.FLAT)
@@ -202,10 +200,6 @@ class MemoryMazeRoot(tk.Tk):
 
         self._redraw_variables()
 
-        if self._game_state.level > previous_level:
-            # self._write_data()
-            pass
-
         if self._game_state.is_game_over:
             self._on_game_over(grid_canvas)
     
@@ -217,38 +211,9 @@ class MemoryMazeRoot(tk.Tk):
             grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
-        self._write_data()
+        self._data.record(self._game_state)
+        self._data.write_default()
         self.after(ANIMATION_CLEAR_DELAY, lambda: self._show_game_over(grid_canvas))
-    
-    def _write_data(self):
-        """
-        Writes any appropriate data to the data file.
-        """
-
-        if os.path.exists(DATA_FILE):
-            tree = ET.parse(DATA_FILE)
-            data = tree.getroot()
-        else:
-            root = ET.Element("memoryMaze")
-            ET.SubElement(root, "highScore").text = "1"
-            ET.SubElement(root, "history")
-            tree = ET.ElementTree(root)
-            tree.write(DATA_FILE)
-        
-        data = ET.parse(DATA_FILE).getroot()
-
-        high_score_node = data.find("highScore")
-        if self._game_state.level > int(high_score_node.text):
-            high_score_node.text = self._game_state.level
-
-        # history_node = data.find("history")
-        # entry_node = ET.SubElement(history_node, "entry")
-        # date_completed_node = ET.SubElement(entry_node, "dateCompleted")
-        # date_completed_node.text = date.today()
-        # score_node = ET.SubElement(entry_node, "score")
-        # score_node.text = self._game_state.level
-
-        # tree.write(DATA_FILE)
     
     def _redraw_variables(self):
         """

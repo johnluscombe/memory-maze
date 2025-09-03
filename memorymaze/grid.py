@@ -11,6 +11,7 @@ class MemoryMazeGrid:
 
     def __init__(self):
         self._path = None
+        self._grid_size = 0
         self._current_index = 0
     
     @property
@@ -46,6 +47,7 @@ class MemoryMazeGrid:
         """
 
         self._path = self._generate_path(path_length, grid_size, [])
+        self._grid_size = grid_size
         self._current_index = 0
         return self.path
     
@@ -112,7 +114,18 @@ class MemoryMazeGrid:
 
         # Check if square is adjacent
         px, py = result
-        return (x, y) in [(px-1, py), (px, py-1), (px+1, py), (px, py+1)]
+        
+        valid_moves = []
+        if px > 0:
+            valid_moves.append((px-1, py))
+        if px < self._grid_size - 1:
+            valid_moves.append((px+1, py))
+        if py > 0:
+            valid_moves.append((px, py-1))
+        if py < self._grid_size - 1:
+            valid_moves.append((px, py+1))
+        
+        return (x, y) in valid_moves
     
     def _generate_path(self, path_length, grid_size, current_path):
         """
