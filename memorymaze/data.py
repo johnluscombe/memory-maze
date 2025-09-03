@@ -41,6 +41,10 @@ class MemoryMazeData:
     def high_score(self):
         return self._high_score
     
+    @property
+    def average(self):
+        return sum(map(lambda e: e.score, self._history)) / len(self._history)
+    
     def read(self, file):
         if os.path.exists(file):
             try:
