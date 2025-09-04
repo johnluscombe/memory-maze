@@ -71,6 +71,9 @@ class MemoryMazeGrid:
             :class:`~SelectResult`
         """
 
+        if self._path is None:
+            return None
+
         if self._path[self._current_index] == (x, y):
             self._current_index += 1
             if self._current_index >= len(self._path):
@@ -140,6 +143,12 @@ class MemoryMazeGrid:
             list or None: list of successful path generation, None if path of
                 given length not possible from current position.
         """
+
+        if path_length <= 0:
+            raise ValueError("Path length must be positive")
+
+        if grid_size <= 0:
+            raise ValueError("Grid size must be positive")
 
         # If we have generated a path of the desired length
         if len(current_path) == path_length:
