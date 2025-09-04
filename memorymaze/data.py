@@ -11,6 +11,8 @@ DEFAULT_DATA_FILE = resource_path("data.dat")
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 
+ENCRYPTION_KEY = "memory-maze"
+
 
 class HistoryEntry:
 
@@ -48,18 +50,23 @@ class MemoryMazeData:
     def read(self, file):
         if os.path.exists(file):
             try:
-                tree = ET.parse(file)
-                data = tree.getroot()
-                
-                self._high_score = int(data.find("highScore").text)
+                with open(file, "rb") as f:
+                    encrypted = f.read()
+                    xml_bytes = bytearray()
+                    for i in range(len(encrypted)):
+                        xml_bytes.append(encrypted[i] ^ ord(ENCRYPTION_KEY[i % len(ENCRYPTION_KEY)]))
+                    
+                    root = ET.fromstring(xml_bytes)
+                    
+                    self._high_score = int(root.find("highScore").text)
 
-                for entry in data.find("history"):
-                    date_completed_str = entry.find("dateCompleted")
-                    date_completed = datetime.strptime(date_completed_str.text, DATETIME_FORMAT)
-                    score = int(entry.find("score").text)
-                    self._history.append(HistoryEntry(date_completed, score))
-                
-                return True
+                    for entry in root.find("history"):
+                        date_completed_str = entry.find("dateCompleted")
+                        date_completed = datetime.strptime(date_completed_str.text, DATETIME_FORMAT)
+                        score = int(entry.find("score").text)
+                        self._history.append(HistoryEntry(date_completed, score))
+                    
+                    return True
             except:
                 print(traceback.format_exc())
                 return False
@@ -77,25 +84,32 @@ class MemoryMazeData:
     
     def write(self, file):
         try:
-            root = ET.Element("memoryMaze")
-            ET.SubElement(root, "history")
+            with open(file, "wb") as f:
+                root = ET.Element("memoryMaze")
+                ET.SubElement(root, "history")
 
-            high_score_node = ET.SubElement(root, "highScore")
-            high_score_node.text = str(self._high_score)
+                high_score_node = ET.SubElement(root, "highScore")
+                high_score_node.text = str(self._high_score)
 
-            for entry in self._history:
-                history_node = root.find("history")
-                entry_node = ET.SubElement(history_node, "entry")
-                date_completed_node = ET.SubElement(entry_node, "dateCompleted")
-                date_completed_node.text = entry.date_completed.strftime(DATETIME_FORMAT)
-                score_node = ET.SubElement(entry_node, "score")
-                score_node.text = str(entry.score)
+                for entry in self._history:
+                    history_node = root.find("history")
+                    entry_node = ET.SubElement(history_node, "entry")
+                    date_completed_node = ET.SubElement(entry_node, "dateCompleted")
+                    date_completed_node.text = entry.date_completed.strftime(DATETIME_FORMAT)
+                    score_node = ET.SubElement(entry_node, "score")
+                    score_node.text = str(entry.score)
 
-            ET.indent(root)
+                ET.indent(root)
 
-            ET.ElementTree(root).write(file)
+                xml_str = ET.tostring(root)
+                encrypted = bytearray()
 
-            return True
+                for i in range(len(xml_str)):
+                    encrypted.append(xml_str[i] ^ ord(ENCRYPTION_KEY[i % len(ENCRYPTION_KEY)]))
+                
+                f.write(encrypted)
+
+                return True
         except:
             print(traceback.format_exc())
             return False
