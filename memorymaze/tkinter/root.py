@@ -4,6 +4,7 @@ from memorymaze import MemoryMaze
 from memorymaze.animation import ANIMATION_DELAY
 from memorymaze.animation import ANIMATION_CLEAR_DELAY
 from memorymaze.data import MemoryMazeData
+from memorymaze.gamestate import GameState
 from memorymaze.style import BOLD
 from memorymaze.style import PRIMARY_COLOR
 from memorymaze.style import SECONDARY_COLOR
@@ -72,7 +73,7 @@ class MemoryMazeRoot(tk.Tk):
         self.bind(KEY, lambda event: self._on_key(event, grid_canvas))
     
     @property
-    def _game_state(self):
+    def _game_state(self) -> GameState:
         """
         Convenience method for getting the game state from the
         :class:`~MemoryMaze` object.
@@ -83,7 +84,7 @@ class MemoryMazeRoot(tk.Tk):
 
         return self._memory_maze.game_state
     
-    def _show_start_frame(self, grid_canvas):
+    def _show_start_frame(self, grid_canvas: GridCanvas):
         """
         Shows the starting screen with the "play" button.
 
@@ -110,7 +111,7 @@ class MemoryMazeRoot(tk.Tk):
         play_button_padding.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
         play_button_label.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
     
-    def _show_game_over(self, grid_canvas):
+    def _show_game_over(self, grid_canvas: GridCanvas):
         """
         Shows the "game over" frame.
 
@@ -151,7 +152,7 @@ class MemoryMazeRoot(tk.Tk):
         play_button_padding.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
         play_button_label.bind(BUTTON_1, lambda *args: self._on_play(frame, grid_canvas))
     
-    def _on_play(self, start_frame, grid_canvas):
+    def _on_play(self, start_frame: tk.Frame, grid_canvas: GridCanvas):
         """
         Called when the "play" button is clicked.
 
@@ -167,7 +168,7 @@ class MemoryMazeRoot(tk.Tk):
         grid_canvas.after(ANIMATION_DELAY, lambda: grid_canvas.show_path())
         self._redraw_variables()
     
-    def _on_grid_canvas_click(self, event, grid_canvas):
+    def _on_grid_canvas_click(self, event, grid_canvas: GridCanvas):
         """
         Called when the grid is clicked.
 
@@ -176,13 +177,11 @@ class MemoryMazeRoot(tk.Tk):
             grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
-        previous_level = self._game_state.level
-
         grid_canvas.on_click(event.x, event.y)
 
-        self._redraw_and_fire_events(previous_level, grid_canvas)
+        self._redraw_and_fire_events(grid_canvas)
     
-    def _on_key(self, event, grid_canvas):
+    def _on_key(self, event, grid_canvas: GridCanvas):
         """
         Called when a key on the keyboard is pressed.
 
@@ -191,20 +190,16 @@ class MemoryMazeRoot(tk.Tk):
             grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
-        previous_level = self._game_state.level
-
         grid_canvas.on_key(event.keysym)
 
-        self._redraw_and_fire_events(previous_level, grid_canvas)
+        self._redraw_and_fire_events(grid_canvas)
     
-    def _redraw_and_fire_events(self, previous_level, grid_canvas):
+    def _redraw_and_fire_events(self, grid_canvas: GridCanvas):
         """
         Updates the level and number of lives, and fires any applicable
         event-driven methods.
 
         Arguments:
-            previous_level (int): Level the user was on prior to the event,
-                used to detect "next level" event.
             grid_canvas (:class:`~GridCanvas`): Grid grid_canvas object.
         """
 
@@ -213,7 +208,7 @@ class MemoryMazeRoot(tk.Tk):
         if self._game_state.is_game_over:
             self._on_game_over(grid_canvas)
     
-    def _on_game_over(self, grid_canvas):
+    def _on_game_over(self, grid_canvas: GridCanvas):
         """
         Called when the game is over.
 

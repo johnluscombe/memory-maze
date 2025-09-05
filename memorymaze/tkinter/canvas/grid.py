@@ -1,5 +1,6 @@
 import tkinter as tk
 
+from memorymaze import MemoryMaze
 from memorymaze.animation import ANIMATION_CLEAR_DELAY
 from memorymaze.animation import ANIMATION_DELAY
 from memorymaze.keyutil import is_down
@@ -25,7 +26,7 @@ class GridCanvas(tk.Canvas):
         parent: Parent widget to pass to the :class:`~tk.Canvas` class.
     """
 
-    def __init__(self, memory_maze, parent, **kwargs):
+    def __init__(self, memory_maze: MemoryMaze, parent, **kwargs):
         super().__init__(parent, **kwargs)
 
         self._memory_maze = memory_maze
@@ -66,7 +67,7 @@ class GridCanvas(tk.Canvas):
         # Start drawing first square
         self._wait_and_draw_next_square(0)
 
-    def on_click(self, canvas_x, canvas_y):
+    def on_click(self, canvas_x: int, canvas_y: int):
         """
         Handles canvas click events.
 
@@ -81,7 +82,7 @@ class GridCanvas(tk.Canvas):
         if 0 <= x_grid < self._grid_size and 0 <= y_grid < self._grid_size:
             self.select(x_grid, y_grid)
     
-    def on_key(self, key):
+    def on_key(self, key: str):
         """
         Handles keyboard events.
 
@@ -101,7 +102,7 @@ class GridCanvas(tk.Canvas):
             elif is_right(key):
                 self.select(px + 1, py)
 
-    def select(self, x, y):
+    def select(self, x: int, y: int) -> SelectResult | None:
         """
         Selects a position on the grid and returns the result.
 
@@ -144,7 +145,7 @@ class GridCanvas(tk.Canvas):
         
         return result
 
-    def _wait_and_draw_next_square(self, idx):
+    def _wait_and_draw_next_square(self, idx: int):
         """
         Recursively draws the next square in the path after a specified delay
         until all path squares are shown.
@@ -193,7 +194,7 @@ class GridCanvas(tk.Canvas):
         # Wait a beat before showing first square
         self.after(ANIMATION_DELAY, lambda: self.show_path())
 
-    def _to_grid_coords(self, canvas_x, canvas_y):
+    def _to_grid_coords(self, canvas_x: int, canvas_y: int) -> tuple[int]:
         """
         Converts canvas coordinates to grid coordinates.
 
@@ -212,7 +213,7 @@ class GridCanvas(tk.Canvas):
 
         return grid_x, grid_y
 
-    def _to_canvas_coords(self, grid_x, grid_y, tile_width, tile_height):
+    def _to_canvas_coords(self, grid_x: int, grid_y: int, tile_width: int, tile_height: int) -> tuple[int]:
         """
         Converts grid coordinates to canvas coordinates.
 
@@ -232,7 +233,7 @@ class GridCanvas(tk.Canvas):
         return canvas_x, canvas_y
 
     @property
-    def _tile_dimensions(self):
+    def _tile_dimensions(self) -> tuple[int]:
         """
         Returns the desired dimension of the tiles based on the canvas and grid
         size.
@@ -250,7 +251,7 @@ class GridCanvas(tk.Canvas):
         return tile_width, tile_height
 
     @property
-    def _grid_size(self):
+    def _grid_size(self) -> int:
         """
         Convenience method for getting the grid size from the game state.
 

@@ -26,7 +26,7 @@ class MemoryMazeGrid:
         return self._path
     
     @property
-    def last_position(self):
+    def last_position(self) -> tuple[int]:
         """
         Returns the previously selected square. Returns None if no square was
         previously selected.
@@ -37,7 +37,7 @@ class MemoryMazeGrid:
         
         return self._path[self._current_index - 1]
     
-    def generate_path(self, path_length, grid_size):
+    def generate_path(self, path_length: int, grid_size: int) -> list[tuple[int]]:
         """
         Generates a path on the grid of the given length and grid size.
 
@@ -51,7 +51,7 @@ class MemoryMazeGrid:
         self._current_index = 0
         return self.path
     
-    def select(self, x, y):
+    def select(self, x: int, y: int) -> SelectResult | None:
         """
         Selects a grid coordinate and returns the result of that action.
         If the user selects a square that is *not* adjacent to the previously
@@ -88,7 +88,7 @@ class MemoryMazeGrid:
         # previously selected square.
         return None
     
-    def _is_valid_move(self, x, y):
+    def _is_valid_move(self, x: int, y: int) -> bool:
         """
         Returns whether the given grid coordinates represent a valid move.
         In order to be valid, the grid coordinates *must* be adjacent to the
@@ -130,7 +130,7 @@ class MemoryMazeGrid:
         
         return (x, y) in valid_moves
     
-    def _generate_path(self, path_length, grid_size, current_path):
+    def _generate_path(self, path_length: int, grid_size: int, current_path: list[tuple[int]]):
         """
         Recursively generates a path of the given length and grid size.
 

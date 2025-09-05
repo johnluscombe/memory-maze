@@ -16,7 +16,7 @@ class MemoryMaze:
         self._generate_path()
     
     @property
-    def game_state(self):
+    def game_state(self) -> GameState:
         """
         Returns the game state.
 
@@ -27,7 +27,7 @@ class MemoryMaze:
         return self._game_state
     
     @property
-    def grid(self):
+    def grid(self) -> MemoryMazeGrid:
         """
         Returns the grid.
         
@@ -37,7 +37,7 @@ class MemoryMaze:
 
         return self._grid
     
-    def select(self, x, y):
+    def select(self, x: int, y: int) -> SelectResult | None:
         """
         Selects a grid coordinate, updates the game state and grid
         accordingly, and returns the result of that action.

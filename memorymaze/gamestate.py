@@ -21,7 +21,7 @@ class GameState:
         self._lives = STARTING_LIVES
     
     @property
-    def level(self):
+    def level(self) -> int:
         """
         Returns the current level.
 
@@ -29,7 +29,7 @@ class GameState:
             int
         """
 
-        return self._level
+        return self._level 
     
     def next_level(self):
         """
@@ -40,7 +40,7 @@ class GameState:
         self._level += 1
     
     @property
-    def lives(self):
+    def lives(self) -> int:
         """
         Returns the number of lives remaining.
 
@@ -50,7 +50,7 @@ class GameState:
 
         return self._lives
     
-    def lose_life(self):
+    def lose_life(self) -> bool:
         """
         Decrements the number of lives by 1, for example, when the user selects
         an incorrect square.
@@ -66,7 +66,7 @@ class GameState:
         return self._lives > 0
 
     @property
-    def is_game_over(self):
+    def is_game_over(self) -> bool:
         """
         Returns whether the game is over.
 
@@ -77,7 +77,7 @@ class GameState:
         return self._lives <= 0
     
     @property
-    def grid_size(self):
+    def grid_size(self) -> int:
         """
         Returns the grid size based on the current level.
 
@@ -88,7 +88,7 @@ class GameState:
         return self._level + START_GRID_SIZE - 1
     
     @property
-    def path_size(self):
+    def path_size(self) -> int:
         """
         Returns the desired path size based on the current level and grid size.
 
